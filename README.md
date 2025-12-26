@@ -13,20 +13,23 @@ Ce projet illustre la transition d'une application Java monolithique vers une ar
 
 ### 🏗️ Architecture Technique
 
-Le système est composé de microservices autonomes communiquant via REST API :
+Le système repose sur une communication inter-services fluide au sein d'un maillage Kubernetes :
 
-* **Transaction-Service (Front Office) :** Point d'entrée, gestion des demandes clients.
-* **Validation-Service (Middle Office) :** Moteur de règles métier (Compliance, plafonds).
-* **Settlement-Service (Back Office) :** Enregistrement et finalisation des opérations.
-* **Infrastructure :** Cluster Kubernetes provisionné dynamiquement via Terraform.
+Transaction-Service : Point d'entrée (Port 8082), orchestre le flux transactionnel.
+
+Validation-Service : Moteur de conformité (Port 8081), valide l'intégrité des flux.
+
+Service Discovery : Utilisation du DNS interne K8s (validation-app) pour supprimer les dépendances d'IP statiques.
 
 ## 🛠️ Stack Technologique
 
-* **Back-End :** Java 17, Spring Boot 3 (Web, Actuator)
-* **Conteneurisation :** Docker, Docker Hub
-* **Orchestration :** Kubernetes (K8s), Minikube
-* **Infrastructure as Code (IaC) :** Terraform (HCL)
-* **CI/CD & Tools :** Maven, Git
+Back-End : Java 17, Spring Boot 3, Spring REST.
+
+Orchestration : Kubernetes (Minikube), Docker Desktop.
+
+Réseau : K8s Services (NodePort & ClusterIP), DNS interne.
+
+IaC : Terraform (Provider Kubernetes).
 
 ---
 
@@ -35,19 +38,19 @@ Le système est composé de microservices autonomes communiquant via REST API :
 Ce projet suit une méthodologie rigoureuse de transformation en 4 phases.
 
 ### 🔹 Phase 1 : Développement & Conteneurisation (Java/Docker)
-- [ ] Initialisation des 3 microservices Spring Boot (Transaction, Validation, Settlement)
-- [ ] Implémentation de la logique métier (Front/Middle/Back)
-- [ ] Mise en place de la communication inter-services (RestTemplate/WebClient)
-- [ ] Création des Dockerfiles optimisés (Multi-stage build)
-- [ ] Création du réseau Docker et tests de communication inter-conteneurs
+- [x] Initialisation des 3 microservices Spring Boot (Transaction, Validation, Settlement)
+- [x] Implémentation de la logique métier (Front/Middle/Back)
+- [x] Mise en place de la communication inter-services (RestTemplate/WebClient)
+- [x] Création des Dockerfiles optimisés (Multi-stage build)
+- [x] Création du réseau Docker et tests de communication inter-conteneurs
 
 ### 🔹 Phase 2 : Orchestration Kubernetes (K8s)
-- [ ] Configuration de l'environnement local (Minikube)
-- [ ] Rédaction des manifestes `Deployment.yaml` pour la haute disponibilité (Replicas)
-- [ ] Configuration des `Service.yaml` (ClusterIP) pour la découverte de services
-- [ ] Externalisation de la configuration (ConfigMaps & Secrets)
-- [ ] Injection des variables d'environnement dans les Pods
-- [ ] Vérification de la résilience (Self-healing, Logs)
+- [x] Configuration de l'environnement local (Minikube)
+- [x] Rédaction des manifestes `Deployment.yaml` pour la haute disponibilité (Replicas)
+- [x] Configuration des `Service.yaml` (ClusterIP) pour la découverte de services
+- [x] Externalisation de la configuration (ConfigMaps & Secrets)
+- [x] Injection des variables d'environnement dans les Pods
+- [x] Vérification de la résilience (Self-healing, Logs)
 
 ### 🔹 Phase 3 : Industrialisation (Infrastructure as Code)
 - [ ] Installation et configuration du Provider Terraform Kubernetes
@@ -68,8 +71,23 @@ Ce projet suit une méthodologie rigoureuse de transformation en 4 phases.
 * Terraform installé
 * Java 17 & Maven
 
-### 1. Construction des Artefacts
-```bash
-# Dans chaque dossier de service (transaction, validation, settlement)
-mvn clean package
-docker build -t votre-user/nom-service:v1 .
+1. Préparation des Images
+Bash
+
+# Build et chargement dans le cluster
+docker build -t validation-service:latest ./validation-service
+minikube image load validation-service:latest
+2. Déploiement Kubernetes
+Bash
+
+kubectl apply -f k8s/validation-deployment.yaml
+kubectl apply -f k8s/validation-service.yaml
+3. Test du flux de bout en bout
+Une fois le tunnel activé via minikube service transaction-service --url, tester le point d'entrée :
+
+Bash
+
+curl -X POST http://<URL_MINIKUBE>/api/transaction \
+     -H "Content-Type: application/json" \
+     -d '{"id": 1, "amount": 100.0}'
+Résultat attendu : VALIDATED (Preuve de la communication réussie entre Transaction et Validation).
