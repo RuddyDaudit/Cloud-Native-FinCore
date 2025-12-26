@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: validation-service
+  labels:
+    app: validation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: validation
+  template:
+    metadata:
+      labels:
+        app: validation
+    spec:
+      containers:
+      - name: validation-service
+        image: docker.io/library/validation-service:latest
+        imagePullPolicy: Never # Très important : utilise l'image chargée manuellement
+        ports:
+        - containerPort: 8081
