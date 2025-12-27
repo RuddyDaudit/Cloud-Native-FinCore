@@ -31,10 +31,27 @@ resource "kubernetes_deployment" "transaction_app" {
             container_port = 8082
           }
 
-          # C'est ici que la magie de l'interconnexion opère !
           env {
             name  = "VALIDATION_SERVICE_URL"
             value = "http://validation-app:8081"
+          }
+
+          # --- AJOUT DES HEALTH CHECKS ---
+          # On attend que Spring Boot soit prêt avant d'ouvrir le trafic sur le port 30082
+        readiness_probe {
+            tcp_socket {
+              port = 8082 # Mets 8082 pour transaction.tf
+            }
+            initial_delay_seconds = 5
+            period_seconds        = 5
+          }
+
+          liveness_probe {
+            tcp_socket {
+              port = 8082 # Mets 8082 pour transaction.tf
+            }
+            initial_delay_seconds = 10
+            period_seconds        = 10
           }
         }
       }
@@ -53,7 +70,7 @@ resource "kubernetes_service" "transaction_service" {
     port {
       port        = 8082
       target_port = 8082
-      node_port   = 30082 # On fixe le port pour ne plus le chercher !
+      node_port   = 30082
     }
     type = "NodePort"
   }
