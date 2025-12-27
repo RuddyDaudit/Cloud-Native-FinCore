@@ -53,10 +53,10 @@ Ce projet suit une méthodologie rigoureuse de transformation en 4 phases.
 - [x] Vérification de la résilience (Self-healing, Logs)
 
 ### 🔹 Phase 3 : Industrialisation (Infrastructure as Code)
-- [ ] Installation et configuration du Provider Terraform Kubernetes
-- [ ] Traduction des manifestes YAML en configurations Terraform (HCL)
-- [ ] Automatisation du provisionnement de l'infrastructure (`terraform apply`)
-- [ ] Validation du déploiement complet "Zéro touche manuelle"
+- [x] Installation et configuration du Provider Terraform Kubernetes
+- [x] Traduction des manifestes YAML en configurations Terraform (HCL)
+- [x] Automatisation du provisionnement de l'infrastructure (`terraform apply`)
+- [x] Validation du déploiement complet "Zéro touche manuelle"
 
 ### 🔹 Phase 4 : Observabilité & Documentation
 - [ ] Documentation technique et guide de déploiement
