@@ -31,25 +31,24 @@ resource "kubernetes_deployment" "transaction_app" {
             container_port = 8082
           }
 
+          # Injection des URLs des autres services
           env {
             name  = "VALIDATION_SERVICE_URL"
             value = "http://validation-app:8081"
           }
+          env {
+            name  = "SETTLEMENT_SERVICE_URL"
+            value = "http://settlement-app:8083" # <--- AJOUT CRITIQUE
+          }
 
-          # --- AJOUT DES HEALTH CHECKS ---
-          # On attend que Spring Boot soit prêt avant d'ouvrir le trafic sur le port 30082
-        readiness_probe {
-            tcp_socket {
-              port = 8082 # Mets 8082 pour transaction.tf
-            }
+          readiness_probe {
+            tcp_socket { port = 8082 }
             initial_delay_seconds = 5
             period_seconds        = 5
           }
 
           liveness_probe {
-            tcp_socket {
-              port = 8082 # Mets 8082 pour transaction.tf
-            }
+            tcp_socket { port = 8082 }
             initial_delay_seconds = 10
             period_seconds        = 10
           }
