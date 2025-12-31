@@ -59,7 +59,7 @@ Ce projet suit une méthodologie rigoureuse de transformation en 4 phases.
 - [x] Validation du déploiement complet "Zéro touche manuelle"
 
 ### 🔹 Phase 4 : Observabilité & Documentation
-- [ ] Documentation technique et guide de déploiement
+- [x] Documentation technique et guide de déploiement
 - [ ] (Bonus) Mise en place d'un Dashboard de monitoring
 
 ---
@@ -77,14 +77,21 @@ Bash
 # Build et chargement dans le cluster
 docker build -t validation-service:latest ./validation-service
 minikube image load validation-service:latest
-2. Déploiement Kubernetes
-Bash
+2. Déploiement via Terraform (Infrastructure as Code)
+Au lieu de gérer manuellement les fichiers YAML, l'infrastructure est provisionnée automatiquement :
 
-kubectl apply -f k8s/validation-deployment.yaml
-kubectl apply -f k8s/validation-service.yaml
+bash
+cd terraform
+terraform init
+terraform apply -auto-approve
+
 3. Test du flux de bout en bout
-Une fois le tunnel activé via minikube service transaction-service --url, tester le point d'entrée :
+Tester le point d'entrée transactionnel :
 
+bash
+curl -X POST http://<URL_TUNNEL_MINIKUBE>/api/transaction \
+     -H "Content-Type: application/json" \
+     -d '{"id": "777", "amount": 500.0, "status": "PENDING"}'
 Bash
 
 curl -X POST http://<URL_MINIKUBE>/api/transaction \
